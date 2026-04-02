@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Mis Finanzas</title>
+<title>MisFinanzas</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -292,7 +292,7 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-app">Mis Finanzas</div>
+  <div class="topbar-app">MisFinanzas</div>
   <div class="topbar-right">
     <div class="month-pill">📅<input type="month" id="global-month" onchange="onMonthChange()"></div>
     <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -304,6 +304,7 @@
 
   <!-- INICIO -->
   <div id="page-inicio" class="page active">
+    <div class="page-heading">Dashboard</div>
     <div class="balance-hero">
       <div class="balance-hero-label">Balance del Mes</div>
       <div class="balance-hero-value pos" id="d-balance">$0.00</div>
@@ -569,6 +570,7 @@ function updateExpCatBar(){
   const spent = (getSpentBycat(m)[cat]||0);
   const pct = Math.min(spent/limit,1);
   const st = limitStatus(spent,limit);
+  const available = limit - spent;
   wrap.style.display='block';
   document.getElementById('ecl-amounts').textContent=`${fmt(spent)} / ${fmt(limit)}`;
   const bar = document.getElementById('ecl-bar');
@@ -576,13 +578,14 @@ function updateExpCatBar(){
   const lbl = document.getElementById('ecl-label');
   const btn = document.getElementById('btn-save-expense');
   if(st==='over'){
-    lbl.innerHTML='<span class="cat-limit-over">🚫 Límite alcanzado</span>';
+    lbl.innerHTML='<span class="cat-limit-over">🚫 Límite alcanzado &nbsp;|&nbsp; Disponible: $0.00</span>';
     btn.disabled=true;
   } else if(st==='warn'){
-    lbl.innerHTML='<span class="cat-limit-warn">⚠️ Próximo al límite</span>';
+    lbl.innerHTML=`<span class="cat-limit-warn">⚠️ Próximo al límite &nbsp;|&nbsp; Disponible: ${fmt(available)}</span>`;
     btn.disabled=false;
   } else {
-    lbl.textContent='Gastado este mes'; btn.disabled=false;
+    lbl.innerHTML=`Gastado: ${fmt(spent)} &nbsp;|&nbsp; <strong style="color:var(--income)">Disponible: ${fmt(available)}</strong>`;
+    btn.disabled=false;
   }
 }
 
@@ -835,8 +838,10 @@ function renderCatLists(){
         const limitLabel=limit
           ?`<span class="lim-spent ${st||''}">${fmt(spent)}</span> / ${fmt(limit)}`
           :'<span style="color:var(--muted)">Sin límite</span>';
+        const available = limit ? Math.max(limit - spent, 0) : 0;
+        const availStr = limit ? `<span style="font-size:.66rem;color:${st==='over'?'#F24405':st==='warn'?'#FA7F08':'var(--income)'}; font-weight:700">Disponible: ${fmt(available)}</span>` : '';
         limitRow=`<div class="cat-limit-row">
-          <div class="cat-limit-label"><span>Gastado este mes</span>${limitLabel}</div>
+          <div class="cat-limit-label"><span>Gastado: ${fmt(spent)}${limit?' / '+fmt(limit):''}</span>${availStr}</div>
           ${limit?`<div class="limit-bar-wrap"><div class="limit-bar ${st||'ok'}" style="width:${pct*100}%"></div></div>`:''}
         </div>`;
       }
